@@ -167,7 +167,12 @@ def get_matchday_info(row_original, df_0):
 
     return row
 
-
+def process_data(imput_data,df_previous,df_current,parameters_to_calculate):
+    clean_X_train = imput_data[['season','division','matchday','home_team','away_team']]
+    X_process_train = clean_X_train.apply(lambda row: get_teams_last_mean_dif_p(row, df_previous, parameters_to_calculate), axis=1)
+    X_process_train = X_process_train.apply(lambda row: get_matchday_info(row, df_current), axis=1)
+    X_process_train = X_process_train[['dif_GD_mean','dif_Pts_mean','yet_GD_dif','yet_pts_dif','yet_sum5_dif']]
+    return X_process_train
 
 
 class QuinielaModel:
@@ -179,13 +184,8 @@ class QuinielaModel:
         df_previous = process_df_previous_seasons(X)
         df_current = process_df_current_season(X)
         parameters_to_calculate = ['Pts', 'GD']
-        def process_X(X_train):
-            clean_X_train = X_train[['season','division','matchday','home_team','away_team']]
-            X_process_train = clean_X_train.apply(lambda row: get_teams_last_mean_dif_p(row, df_previous, parameters_to_calculate), axis=1)
-            X_process_train = X_process_train.apply(lambda row: get_matchday_info(row, df_current), axis=1)
-            X_process_train = X_process_train[['dif_GD_mean','dif_Pts_mean','yet_GD_dif','yet_pts_dif','yet_sum5_dif']]
-            return X_process_train
-        X_process = process_X(X)
+ 
+        X_process = process_data(X,df_previous,df_current,parameters_to_calculate)
         y_str = y.astype(str)
         self.clf = GaussianNB()
         self.clf.fit(X_process, y_str)
@@ -198,19 +198,7 @@ class QuinielaModel:
         df_previous = process_df_previous_seasons(X)
         df_current = process_df_current_season(X)
         parameters_to_calculate = ['Pts', 'GD']
-        def process_predict_data(predict_data):
-
-            processed_data = predict_data[['season', 'division', 'matchday', 'home_team', 'away_team']]
-            processed_data = processed_data.apply(lambda row: get_teams_last_mean_dif_p(row, df_previous, parameters_to_calculate), axis=1)
-            processed_data = processed_data.apply(lambda row: get_matchday_info(row, df_current), axis=1)
-            processed_data = processed_data[['dif_GD_mean', 'dif_Pts_mean', 'yet_GD_dif', 'yet_pts_dif', 'yet_sum5_dif']]
-
-            return processed_data
-        
-        # 1. Process the predict_data
-        X_process = process_predict_data(predict_data)
-
-        # 2. Use the trained model to make predictions
+        X_process = process_data(predict_data,df_previous,df_current,parameters_to_calculate)
         predictions = self.clf.predict(X_process)
 
         return predictions
