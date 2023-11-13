@@ -1,0 +1,7 @@
+[console_scripts]
+ipython = IPython:start_ipython
+ipython3 = IPython:start_ipython
+
+[pygments.lexers]
+ipython3 = IPython.lib.lexers:IPython3Lexer
+ipythonconsole = IPython.lib.lexers:IPythonConsoleLexer
