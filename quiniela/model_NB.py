@@ -3,11 +3,11 @@ from sklearn.naive_bayes import GaussianNB
 import numpy as np
 import sqlite3
 import pandas as pd
-import matplotlib.pyplot as plt
 import math
+import matplotlib.pyplot as plt
 from datetime import datetime
-from sklearn.model_selection import train_test_split
 import os
+
 #Definitions to process original data into a better one:
 
 #Creates a new columns with the result of the match
@@ -174,7 +174,6 @@ def process_data(imput_data,df_previous,df_current,parameters_to_calculate):
     X_process_train = X_process_train[['dif_GD_mean','dif_Pts_mean','yet_GD_dif','yet_pts_dif','yet_sum5_dif']]
     return X_process_train
 
-
 class QuinielaModel:
 
     def train(self, train_data):  
@@ -184,21 +183,21 @@ class QuinielaModel:
         df_previous = process_df_previous_seasons(X)
         df_current = process_df_current_season(X)
         parameters_to_calculate = ['Pts', 'GD']
- 
         X_process = process_data(X,df_previous,df_current,parameters_to_calculate)
         y_str = y.astype(str)
         self.clf = GaussianNB()
         self.clf.fit(X_process, y_str)
+        df_current.to_csv('reports/df_current.csv', index=False)
+        df_previous.to_csv('reports/df_previous.csv', index=False)
         pass
 
     def predict(self, predict_data):
         df_1 = process_and_filter_data(predict_data)
         X = df_1.iloc[:, :-1] 
-        y = df_1['result']
-        df_previous = process_df_previous_seasons(X)
-        df_current = process_df_current_season(X)
+        df_current = pd.read_csv('reports/df_current.csv')
+        df_previous = pd.read_csv('reports/df_previous.csv')
         parameters_to_calculate = ['Pts', 'GD']
-        X_process = process_data(predict_data,df_previous,df_current,parameters_to_calculate)
+        X_process = process_data(X,df_previous,df_current,parameters_to_calculate)
         predictions = self.clf.predict(X_process)
 
         return predictions
