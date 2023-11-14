@@ -4,7 +4,7 @@ import argparse
 from datetime import datetime
 
 import settings
-from quiniela import model_NB, io
+from quiniela import QuinielaModel, io
 
 
 def parse_seasons(value):
@@ -77,14 +77,14 @@ if __name__ == "__main__":
     )
     if args.task == "train":
         logging.info(f"Training LaQuiniela model with seasons {args.training_seasons}")
-        model = model_NB.QuinielaModel()
+        model = QuinielaModel.QuinielaModel()
         training_data = io.load_historical_data(args.training_seasons)
         model.train(training_data)
         model.save(settings.MODELS_PATH / args.model_name)
         print(f"Model succesfully trained and saved in {settings.MODELS_PATH / args.model_name}")
     if args.task == "predict":
         logging.info(f"Predicting matchday {args.matchday} in season {args.season}, division {args.division}")
-        model = model_NB.QuinielaModel.load(settings.MODELS_PATH / args.model_name)
+        model = QuinielaModel.QuinielaModel.load(settings.MODELS_PATH / args.model_name)
         predict_data = io.load_matchday(args.season, args.division, args.matchday)
         predict_data["pred"] = model.predict(predict_data)
         print(f"Matchday {args.matchday} - LaLiga - Division {args.division} - Season {args.season}")
