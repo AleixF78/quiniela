@@ -1,12 +1,7 @@
 import pickle
 from sklearn.naive_bayes import GaussianNB
 import numpy as np
-import sqlite3
 import pandas as pd
-import math
-import matplotlib.pyplot as plt
-from datetime import datetime
-import os
 
 #Definitions to process original data into a better one:
 
@@ -155,17 +150,24 @@ def get_matchday_info(row_original, df_0):
     season = row['season']
     matchday = row['matchday']
 
-    
     df_0_matchday = df_0[(df_0['season'] == season) & (df_0['matchday'] == matchday)]
-    
-    home_info = df_0_matchday[df_0_matchday['team'] == home_team].iloc[0]
-    away_info = df_0_matchday[df_0_matchday['team'] == away_team].iloc[0]
 
-    row['yet_pts_dif'] = home_info['Pts'] - away_info['Pts']
-    row['yet_sum5_dif'] = home_info['Sum'] - away_info['Sum']
-    row['yet_GD_dif'] = home_info['GD'] - away_info['GD']
+    if  df_0_matchday.empty:
+        # Handle the case when there is no data for the specified season and matchday
+        row['yet_pts_dif'] = 0
+        row['yet_sum5_dif'] = 0
+        row['yet_GD_dif'] = 0
+
+    else:
+        home_info = df_0_matchday[df_0_matchday['team'] == home_team].iloc[0]
+        away_info = df_0_matchday[df_0_matchday['team'] == away_team].iloc[0]
+
+        row['yet_pts_dif'] = home_info['Pts'] - away_info['Pts']
+        row['yet_sum5_dif'] = home_info['Sum'] - away_info['Sum']
+        row['yet_GD_dif'] = home_info['GD'] - away_info['GD']
 
     return row
+
 
 def process_data(imput_data,df_previous,df_current,parameters_to_calculate):
     clean_X_train = imput_data[['season','division','matchday','home_team','away_team']]
